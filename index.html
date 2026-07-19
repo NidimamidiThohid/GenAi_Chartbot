@@ -1,0 +1,131 @@
+<html>
+    <head>
+        <title> GENAI ACADEMIC HELPDESK</title>
+        <style>
+            body{
+                font-family: Arial;
+                background-color: cadetblue;
+            }
+            .container{
+                width: 50%;
+                margin: auto;
+                margin-top: 100px;
+                padding: 20px;
+                background: white;
+                border-radius: 10px;
+            }
+            h1{
+                text-align: center;
+                color: navy;
+            }
+            p{
+                text-align: center;
+            }
+            #chat-box{
+                border: 1px solid gray;
+                height: 300px;
+                padding: 10px;
+                overflow-y: auto;
+                background: #fafafa;
+            }
+            input{
+                width: 80%;
+                padding: 10px;
+            }
+            button{
+                color:blue;
+                padding: 10px;
+                margin-bottom: 10px;
+                cursor: pointer;
+                transition: 0.3s;
+            }
+            button:hover{
+                transform: scale(1.1);
+                background-color:darkseagreen;
+                color: white;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <marquee scrollamount="15">
+            <h1>GENAI ACADEMIC Helpdesk</h1>
+            </marquee>
+            <p>your inteligent campus assistant</p>
+            <div class="suggestions">
+                <button onclick="setQuestion('what is the library timings')">Library</button>
+                <button onclick="setQuestion('what is Placement eligibility')">Placement</button>
+                <button onclick="setQuestion('what are the hostel rules')">Hostel</button>
+                <button onclick="setQuestion('when do exams start')">Exams</button>
+            </div>
+            <div id="chat-box">
+                <div class="bot-msg">
+                    Hello! i am your GENAI ACADEMIC assistant.
+                    Ask anything about: syllabus,Placement,Hostel,Exams and more
+                </div>
+            </div>
+            <div class="input-area">
+                <input type="text" id="question" placeholder="enter your question.....">
+                <button onclick="ask()">Send</button>
+            </div>
+        </div>
+        <script>
+            function setQuestion(text){
+                document.getElementById("question").value=text
+            }
+            async function ask(){
+                let q = document.getElementById("question").value;
+
+                if(q.trim()=="") return;
+
+                let box = document.getElementById("chat-box")
+
+                box.innerHTML +=`
+                <div class="user-msg">
+                    ${q}
+                    <div class="time">
+                        ${new Date().toLocaleTimeString()}
+                </div>
+            </div>`
+            ;
+            box.innerHTML +=`
+            <div class="typing" id="loading">
+                Ai is typing..
+                </div>
+                `
+                box.scrollTop=box.scrollHeight;
+
+                let res=await fetch("/ask",{
+                    method:"POST",
+
+                    headers:{
+                        "Content-Type":"application/json"
+                    },
+                    body:JSON.stringify({
+                        question:q
+                    })
+                });
+                let data=await res.json();
+
+                //remove loading
+                document.getElementById("loading").remove();
+
+                box.innerHTML+=`
+                <div class="bot-msg">
+                ${data.answer}
+                <div class="time">
+                    ${new Date().toLocaleTimeString()}
+                    </div>
+                </div>`
+                box.scrollTop=box.scrollHeight;
+                //clear input
+                document.getElementById("question").value="";
+            }
+            document.getElementById("question").addEventListener("keypress",function(event){
+                if(event.key === "Enter"){
+                    ask();
+                }
+            })
+        </script>
+    </body>
+</html>
